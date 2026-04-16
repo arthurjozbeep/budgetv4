@@ -636,7 +636,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   <div class="header">
     <h1>Mon budget</h1>
     <div class="header-actions">
-      <button onclick="exportJSON()">Backup JSON</button>
+      <button onclick="setupPrivatePatterns()">Configurer</button>
       <button onclick="exportCSV()">Exporter CSV</button>
       <button onclick="document.getElementById('jsonFile').click()">Restaurer JSON</button>
       <button onclick="resetAll()" style="color:var(--red)">Réinitialiser</button>
@@ -1358,6 +1358,38 @@ let pendingImport = [];
 function matchesStoredPattern(desc, key) {
   const d = String(desc || '').toUpperCase();
   return getStoredPatterns(key).some(p => d.includes(String(p).toUpperCase()));
+}
+
+  function setupPrivatePatterns() {
+  const currentInternal = getStoredPatterns('internal_patterns').join(', ');
+  const currentSalary = getStoredPatterns('salary_patterns').join(', ');
+
+  const internalInput = prompt(
+    "Mots-clés privés pour ignorer les virements internes (séparés par des virgules) :",
+    currentInternal
+  );
+  if (internalInput === null) return;
+
+  const salaryInput = prompt(
+    "Mots-clés privés pour reconnaître le salaire (séparés par des virgules) :",
+    currentSalary
+  );
+  if (salaryInput === null) return;
+
+  const internalPatterns = internalInput
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const salaryPatterns = salaryInput
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  localStorage.setItem('internal_patterns', JSON.stringify(internalPatterns));
+  localStorage.setItem('salary_patterns', JSON.stringify(salaryPatterns));
+
+  showToast('Configuration privée enregistrée');
 }
 
 function categorizePDF(desc) {
